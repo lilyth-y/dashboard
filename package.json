@@ -8,6 +8,8 @@
     "dev:strict": "node ./scripts/dev-strict.mjs",
     "dev:fixed": "next dev -p 3051",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm run lint && pnpm run typecheck",
     "start": "next start",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
