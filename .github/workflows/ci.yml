@@ -50,6 +50,17 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Test Coverage
+        run: pnpm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-upload
+          fail_ci_if_error: false
+
       - name: Build
         env:
           NEXT_TELEMETRY_DISABLED: 1

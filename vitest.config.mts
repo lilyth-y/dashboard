@@ -14,5 +14,26 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     css: false,
     globals: true,
+    exclude: ['**/node_modules/**', '**/e2e/**', '**/.next/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      exclude: [
+        'node_modules/**',
+        '.next/**',
+        'e2e/**',
+        '**/*.config.*',
+        '**/*.setup.*',
+        '**/__tests__/**',
+        '**/types/**',
+        'prisma/**',
+      ],
+      thresholds: {
+        statements: 50,
+        branches: 50,
+        functions: 50,
+        lines: 50,
+      },
+    },
   },
 })
