@@ -7,9 +7,9 @@
     "dev": "next dev",
     "dev:strict": "node ./scripts/dev-strict.mjs",
     "dev:fixed": "next dev -p 3051",
-    "lint": "next lint",
+  "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm run lint && pnpm run typecheck",
+  "check": "pnpm run lint && pnpm run typecheck",
     "start": "next start",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -91,6 +91,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9.37.0",
     "eslint-config-next": "15.5.5",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-unused-imports": "^4.3.0",
     "husky": "^9.1.7",
     "jsdom": "^25.0.1",
     "lint-staged": "^15.5.2",
@@ -98,6 +100,7 @@
     "tailwindcss": "^3.4.17",
     "tsx": "^4.20.6",
     "typescript": "^5",
+    "typescript-eslint": "^8.46.2",
     "vitest": "^2.1.9"
   },
   "lint-staged": {

@@ -2,5 +2,24 @@
   "extends": [
     "next/core-web-vitals",
     "next/typescript"
-  ]
+  ],
+  "plugins": ["import", "@typescript-eslint", "unused-imports"],
+  "rules": {
+    "import/order": [
+      "warn",
+      {
+        "newlines-between": "always",
+        "alphabetize": { "order": "asc", "caseInsensitive": true },
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          ["parent", "sibling", "index"],
+          "object",
+          "type"
+        ]
+      }
+    ],
+    "unused-imports/no-unused-imports": "warn"
+  }
 }
