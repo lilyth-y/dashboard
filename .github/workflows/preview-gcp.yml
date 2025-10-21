@@ -1,0 +1,124 @@
+name: Preview Deploy (GCP)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  GCP_REGION: asia-northeast3
+  SERVICE_NAME_PREFIX: dashboard-pr
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm run db:generate
+
+      - name: Build Next.js
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+        run: pnpm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build-pr-${{ github.event.pull_request.number }}
+          path: |
+            .next
+            package.json
+            next.config.mjs
+            pnpm-lock.yaml
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IMAGE_TAG: pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+        run: |
+          IMAGE_URI="${{ env.GCP_REGION }}-docker.pkg.dev/${PROJECT_ID}/dashboard/${SERVICE_NAME_PREFIX}-${PR_NUMBER}:${IMAGE_TAG}"
+          docker build -t ${IMAGE_URI} .
+          docker push ${IMAGE_URI}
+          echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SERVICE_NAME: ${{ env.SERVICE_NAME_PREFIX }}-${{ github.event.pull_request.number }}
+        run: |
+          gcloud run deploy ${SERVICE_NAME} \
+            --image ${{ env.IMAGE_URI }} \
+            --platform managed \
+            --region ${{ env.GCP_REGION }} \
+            --allow-unauthenticated \
+            --set-env-vars="NODE_ENV=production,NEXT_TELEMETRY_DISABLED=1" \
+            --memory=512Mi \
+            --cpu=1 \
+            --timeout=300 \
+            --max-instances=2 \
+            --project=${PROJECT_ID}
+          
+          SERVICE_URL=$(gcloud run services describe ${SERVICE_NAME} \
+            --platform managed \
+            --region ${{ env.GCP_REGION }} \
+            --format 'value(status.url)' \
+            --project=${PROJECT_ID})
+          
+          echo "service_url=${SERVICE_URL}" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with Preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🚀 Preview Deployment Ready
+
+              **Preview URL:** ${{ steps.deploy.outputs.service_url }}
+
+              Cloud Run service: \`${{ env.SERVICE_NAME_PREFIX }}-${{ github.event.pull_request.number }}\`
+              Region: \`${{ env.GCP_REGION }}\`
+              Image: \`${{ env.IMAGE_URI }}\`
+
+              This preview will be automatically cleaned up when the PR is closed.`
+            })

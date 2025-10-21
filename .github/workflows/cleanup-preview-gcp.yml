@@ -1,0 +1,52 @@
+name: Cleanup Preview (GCP)
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [ main ]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_REGION: asia-northeast3
+  SERVICE_NAME_PREFIX: dashboard-pr
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Delete Cloud Run Service
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SERVICE_NAME: ${{ env.SERVICE_NAME_PREFIX }}-${{ github.event.pull_request.number }}
+        run: |
+          gcloud run services delete ${SERVICE_NAME} \
+            --platform managed \
+            --region ${{ env.GCP_REGION }} \
+            --project=${PROJECT_ID} \
+            --quiet || echo "Service not found or already deleted"
+
+      - name: Delete Container Images
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          REPO_PATH="${{ env.GCP_REGION }}-docker.pkg.dev/${PROJECT_ID}/dashboard"
+          gcloud artifacts docker images delete \
+            ${REPO_PATH}/${SERVICE_NAME_PREFIX}-${PR_NUMBER} \
+            --delete-tags \
+            --project=${PROJECT_ID} \
+            --quiet || echo "Images not found or already deleted"
