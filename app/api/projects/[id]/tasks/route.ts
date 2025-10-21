@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
+
+import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 async function canView(projectId: string, userId: string, isAdmin: boolean) {
   if (isAdmin) return true
@@ -25,12 +27,12 @@ async function canManage(projectId: string, userId: string, isAdmin: boolean) {
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
     const projectId = params.id
     const allowed = await canView(projectId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     const tasks = await prisma.task.findMany({
       where: { projectId },
@@ -43,6 +45,14 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ tasks })
   } catch (error: unknown) {
     console.error("Tasks list error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }
@@ -51,12 +61,12 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
     const projectId = params.id
     const allowed = await canManage(projectId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     const body = await req.json()
     const { title, description, priority, assignedTo, dueDate } = body as {
@@ -66,7 +76,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       assignedTo?: string | null
       dueDate?: string | null
     }
-    if (!title || !title.trim()) return NextResponse.json({ error: "제목은 필수입니다." }, { status: 400 })
+    if (!title || !title.trim()) {
+      throw ApiError.badRequest("제목은 필수입니다.", "TASK_TITLE_REQUIRED")
+    }
 
     const t = await prisma.task.create({
       data: {
@@ -83,6 +95,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ id: t.id }, { status: 201 })
   } catch (error: unknown) {
     console.error("Task create error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }

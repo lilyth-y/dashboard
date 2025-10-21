@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
+
+import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 async function canManage(projectId: string, userId: string, isAdmin: boolean) {
   if (isAdmin) return true
@@ -15,17 +17,17 @@ async function canManage(projectId: string, userId: string, isAdmin: boolean) {
 export async function PUT(req: Request, { params }: { params: { id: string; userId: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
     const projectId = params.id
     const targetUserId = params.userId
     const allowed = await canManage(projectId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     const body = await req.json()
     const { role } = body as { role?: "OWNER" | "MANAGER" | "MEMBER" }
-    if (!role) return NextResponse.json({ error: "role이 필요합니다." }, { status: 400 })
+    if (!role) throw ApiError.badRequest("role이 필요합니다.", "MEMBER_ROLE_REQUIRED")
 
     await prisma.projectMember.update({
       where: { userId_projectId: { userId: targetUserId, projectId } },
@@ -34,6 +36,14 @@ export async function PUT(req: Request, { params }: { params: { id: string; user
     return NextResponse.json({ ok: true })
   } catch (error: unknown) {
     console.error("Member update error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }
@@ -41,13 +51,13 @@ export async function PUT(req: Request, { params }: { params: { id: string; user
 export async function DELETE(_req: Request, { params }: { params: { id: string; userId: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
     const projectId = params.id
     const targetUserId = params.userId
     const allowed = await canManage(projectId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     await prisma.projectMember.delete({
       where: { userId_projectId: { userId: targetUserId, projectId } },
@@ -55,6 +65,14 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
     return NextResponse.json({ ok: true })
   } catch (error: unknown) {
     console.error("Member delete error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }

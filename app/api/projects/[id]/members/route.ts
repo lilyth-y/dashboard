@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
+
+import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 async function canView(projectId: string, userId: string, isAdmin: boolean) {
   if (isAdmin) return true
@@ -25,12 +27,12 @@ async function canManage(projectId: string, userId: string, isAdmin: boolean) {
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
     const projectId = params.id
     const allowed = await canView(projectId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     const members = await prisma.projectMember.findMany({
       where: { projectId },
@@ -46,6 +48,14 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ members })
   } catch (error: unknown) {
     console.error("Members list error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }
@@ -54,26 +64,28 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
     const projectId = params.id
     const allowed = await canManage(projectId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     const body = await req.json()
     const { userId, email, role } = body as { userId?: string; email?: string; role?: "OWNER" | "MANAGER" | "MEMBER" }
     if (!role || !(role === "OWNER" || role === "MANAGER" || role === "MEMBER")) {
-      return NextResponse.json({ error: "유효하지 않은 역할입니다." }, { status: 400 })
+      throw ApiError.badRequest("유효하지 않은 역할입니다.", "MEMBER_INVALID_ROLE")
     }
 
     let targetUserId = userId || ""
     if (!targetUserId && email) {
       const u = await prisma.user.findUnique({ where: { email }, select: { id: true } })
-      if (!u) return NextResponse.json({ error: "해당 이메일의 사용자를 찾을 수 없습니다." }, { status: 404 })
+      if (!u) throw ApiError.notFound("해당 이메일의 사용자를 찾을 수 없습니다.")
       targetUserId = u.id
     }
-    if (!targetUserId) return NextResponse.json({ error: "userId 또는 email이 필요합니다." }, { status: 400 })
+    if (!targetUserId) {
+      throw ApiError.badRequest("userId 또는 email이 필요합니다.", "MEMBER_IDENTIFIER_REQUIRED")
+    }
 
     await prisma.projectMember.create({
       data: { userId: targetUserId, projectId, role },
@@ -82,6 +94,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ ok: true }, { status: 201 })
   } catch (error: unknown) {
     console.error("Member add error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }

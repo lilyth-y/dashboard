@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
+
+import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "인증이 필요합니다." },
-        { status: 401 }
-      )
+      throw ApiError.unauthorized()
     }
 
     const body = await request.json()
@@ -19,17 +18,11 @@ export async function POST(request: NextRequest) {
 
     // 입력 유효성 검사
     if (!amount || !type || !category || !date) {
-      return NextResponse.json(
-        { error: "필수 항목을 모두 입력해주세요." },
-        { status: 400 }
-      )
+      throw ApiError.badRequest("필수 항목을 모두 입력해주세요.", "TRANSACTION_REQUIRED_FIELDS")
     }
 
     if (type !== 'INCOME' && type !== 'EXPENSE') {
-      return NextResponse.json(
-        { error: "거래 유형이 올바르지 않습니다." },
-        { status: 400 }
-      )
+      throw ApiError.badRequest("거래 유형이 올바르지 않습니다.", "TRANSACTION_INVALID_TYPE")
     }
 
     // 지출의 경우 음수로 저장
@@ -59,6 +52,14 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Transaction creation error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json(
       { error: "서버 오류가 발생했습니다." },
       { status: 500 }
@@ -71,10 +72,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "인증이 필요합니다." },
-        { status: 401 }
-      )
+      throw ApiError.unauthorized()
     }
 
     const { searchParams } = new URL(request.url)
@@ -113,6 +111,14 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("Transaction fetch error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json(
       { error: "서버 오류가 발생했습니다." },
       { status: 500 }

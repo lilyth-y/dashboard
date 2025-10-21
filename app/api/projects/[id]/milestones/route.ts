@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
+
+import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 async function canView(projectId: string, userId: string, isAdmin: boolean) {
   if (isAdmin) return true
@@ -25,12 +27,12 @@ async function canManage(projectId: string, userId: string, isAdmin: boolean) {
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
     const projectId = params.id
     const allowed = await canView(projectId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     const milestones = await prisma.milestone.findMany({
       where: { projectId },
@@ -41,6 +43,14 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ milestones })
   } catch (error: unknown) {
     console.error("Milestones list error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }
@@ -49,16 +59,18 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
     const projectId = params.id
     const allowed = await canManage(projectId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     const body = await req.json()
     const { title, description, dueDate } = body as { title?: string; description?: string | null; dueDate?: string }
-    if (!title || !dueDate) return NextResponse.json({ error: "제목과 마감일은 필수입니다." }, { status: 400 })
+    if (!title || !dueDate) {
+      throw ApiError.badRequest("제목과 마감일은 필수입니다.", "MILESTONE_REQUIRED_FIELDS")
+    }
 
     const m = await prisma.milestone.create({
       data: {
@@ -73,6 +85,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ id: m.id }, { status: 201 })
   } catch (error: unknown) {
     console.error("Milestone create error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }

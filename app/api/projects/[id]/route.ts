@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
+
+import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 // Helper to check if user can manage the project (ADMIN or OWNER/MANAGER member)
 async function canManage(projectId: string, userId: string, isAdmin: boolean) {
@@ -20,7 +22,7 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+      throw ApiError.unauthorized()
     }
 
     const projectId = params.id
@@ -28,7 +30,7 @@ export async function PUT(
     const allowed = await canManage(projectId, session.user.id, isAdmin)
 
     if (!allowed) {
-      return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+      throw ApiError.forbidden()
     }
 
     const body = await request.json()
@@ -57,6 +59,14 @@ export async function PUT(
     return NextResponse.json({ id: updated.id })
   } catch (error: unknown) {
     console.error("Project update error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }
@@ -68,7 +78,7 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+      throw ApiError.unauthorized()
     }
 
     const projectId = params.id
@@ -76,13 +86,21 @@ export async function DELETE(
     const allowed = await canManage(projectId, session.user.id, isAdmin)
 
     if (!allowed) {
-      return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+      throw ApiError.forbidden()
     }
 
     await prisma.project.delete({ where: { id: projectId } })
     return NextResponse.json({ ok: true })
   } catch (error: unknown) {
     console.error("Project delete error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }

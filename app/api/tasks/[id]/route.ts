@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
+
+import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 async function canManageByTask(taskId: string, userId: string, isAdmin: boolean) {
   if (isAdmin) return true
@@ -17,12 +19,12 @@ async function canManageByTask(taskId: string, userId: string, isAdmin: boolean)
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
     const isAdmin = session.user.role === "ADMIN"
 
     const taskId = params.id
     const allowed = await canManageByTask(taskId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     const body = await req.json()
     const { title, description, status, priority, assignedTo, dueDate } = body as {
@@ -49,6 +51,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ ok: true })
   } catch (error: unknown) {
     console.error("Task update error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }
@@ -56,17 +66,25 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+    if (!session?.user) throw ApiError.unauthorized()
     const isAdmin = session.user.role === "ADMIN"
 
     const taskId = params.id
     const allowed = await canManageByTask(taskId, session.user.id, isAdmin)
-    if (!allowed) return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    if (!allowed) throw ApiError.forbidden()
 
     await prisma.task.delete({ where: { id: taskId } })
     return NextResponse.json({ ok: true })
   } catch (error: unknown) {
     console.error("Task delete error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }

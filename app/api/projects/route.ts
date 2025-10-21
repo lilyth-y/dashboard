@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
+
+import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 // GET /api/projects - list projects for current user; admins see all
 export async function GET() {
@@ -9,10 +11,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "인증이 필요합니다." },
-        { status: 401 }
-      )
+      throw ApiError.unauthorized()
     }
 
     const isAdmin = session.user.role === "ADMIN"
@@ -58,6 +57,14 @@ export async function GET() {
     return NextResponse.json({ projects: shaped })
   } catch (error: unknown) {
     console.error("Projects fetch error:", error)
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
     return NextResponse.json(
       { error: "서버 오류가 발생했습니다." },
       { status: 500 }
@@ -70,7 +77,7 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 })
+      throw ApiError.unauthorized()
     }
 
     const body = await request.json()
@@ -83,7 +90,7 @@ export async function POST(request: Request) {
     }
 
     if (!name || name.trim().length === 0) {
-      return NextResponse.json({ error: "프로젝트 이름은 필수입니다." }, { status: 400 })
+      throw ApiError.badRequest("프로젝트 이름은 필수입니다.", "PROJECT_NAME_REQUIRED")
     }
 
     const project = await prisma.project.create({
@@ -104,6 +111,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ id: project.id }, { status: 201 })
   } catch (error: unknown) {
     console.error("Project create error:", error)
-    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
+    
+    if (isApiError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      )
+    }
+    
+    return NextResponse.json(
+      { error: "서버 오류가 발생했습니다." },
+      { status: 500 }
+    )
   }
 }
