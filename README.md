@@ -27,3 +27,17 @@ Stop-Process -Id <PID> -Force
 
 - Browser:
   - <http://localhost:3051> → redirects to /dashboard
+
+## Tests
+
+Run unit tests once:
+
+```powershell
+pnpm test
+```
+
+Run tests in watch mode:
+
+```powershell
+pnpm test:watch
+```

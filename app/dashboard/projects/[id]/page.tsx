@@ -1050,3 +1050,6 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     </Layout>
   )
 }
+
+// Exported for testing
+export { TaskDetailDialog }

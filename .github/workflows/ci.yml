@@ -39,6 +39,9 @@ jobs:
       - name: Validate Prisma schema
         run: npx prisma validate
 
+      - name: Test
+        run: pnpm test
+
       - name: Build
         env:
           NEXT_TELEMETRY_DISABLED: 1
