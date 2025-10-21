@@ -1,18 +1,19 @@
 "use client"
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react"
+import { DayButton } from "react-day-picker"
+
 import Layout from "@/components/kokonutui/layout"
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
-import { Calendar } from "@/components/ui/calendar"
-import { DayButton } from "react-day-picker"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useToast } from "@/hooks/use-toast"
 
 type ProjectMemberRole = "OWNER" | "MANAGER" | "MEMBER"
 
@@ -196,6 +197,9 @@ function TaskDetailDialog({
   ) => Promise<void>
 }) {
   const headingId = useId()
+  const titleId = useId()
+  const descId = useId()
+  const dueId = useId()
   const titleInputRef = useRef<HTMLInputElement | null>(null)
   const saveButtonRef = useRef<HTMLButtonElement | null>(null)
   const [title, setTitle] = useState("")
@@ -248,17 +252,17 @@ function TaskDetailDialog({
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label>제목</Label>
-            <Input ref={titleInputRef} autoFocus value={title} onChange={(e) => setTitle(e.target.value)} disabled={!canManage} />
+            <Label htmlFor={titleId}>제목</Label>
+            <Input id={titleId} ref={titleInputRef} autoFocus value={title} onChange={(e) => setTitle(e.target.value)} disabled={!canManage} />
           </div>
           <div>
-            <Label>설명</Label>
-            <Input value={desc} onChange={(e) => setDesc(e.target.value)} disabled={!canManage} />
+            <Label htmlFor={descId}>설명</Label>
+            <Input id={descId} value={desc} onChange={(e) => setDesc(e.target.value)} disabled={!canManage} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
               <Label>우선순위</Label>
-              <Select value={priority} onValueChange={(v: Priority) => setPriority(v)} disabled={!canManage}>
+              <Select aria-label="우선순위" value={priority} onValueChange={(v: Priority) => setPriority(v)} disabled={!canManage}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -271,12 +275,13 @@ function TaskDetailDialog({
               </Select>
             </div>
             <div>
-              <Label>마감일</Label>
-              <Input type="date" value={due} onChange={(e) => setDue(e.target.value)} disabled={!canManage} />
+              <Label htmlFor={dueId}>마감일</Label>
+              <Input id={dueId} type="date" value={due} onChange={(e) => setDue(e.target.value)} disabled={!canManage} />
             </div>
             <div>
               <Label>담당자</Label>
               <Select
+                aria-label="담당자"
                 value={assignee}
                 onValueChange={(v: string) => {
                   const next = v === 'UNASSIGNED' ? 'UNASSIGNED' : v
