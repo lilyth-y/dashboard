@@ -1,10 +1,13 @@
-import { NextAuthOptions } from "next-auth"
-import type { Adapter } from "next-auth/adapters"
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import GoogleProvider from "next-auth/providers/google"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { NextAuthOptions } from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import GoogleProvider from "next-auth/providers/google"
+
+import { prisma } from "@/lib/prisma"
+
+import type { Adapter } from "next-auth/adapters"
+
 
 export const authOptions: NextAuthOptions = {
   // Cast to NextAuth Adapter to resolve type mismatch between @auth/prisma-adapter and next-auth v4 types

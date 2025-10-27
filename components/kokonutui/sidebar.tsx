@@ -15,12 +15,11 @@ import {
   HelpCircle,
   Menu,
 } from "lucide-react"
-
 import { Home } from "lucide-react"
-import Link from "next/link"
-import { useState } from "react"
-import { usePathname } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useState } from "react"
 
 export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

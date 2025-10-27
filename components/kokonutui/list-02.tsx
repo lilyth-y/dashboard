@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils"
 import {
   ArrowUpRight,
   ArrowDownLeft,
@@ -8,6 +7,8 @@ import {
   type LucideIcon,
   ArrowRight,
 } from "lucide-react"
+
+import { cn } from "@/lib/utils"
 
 interface Transaction {
   id: string

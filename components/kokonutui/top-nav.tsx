@@ -1,12 +1,14 @@
 "use client"
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Image from "next/image"
 import { Bell, ChevronRight } from "lucide-react"
-import UserProfile from "./user-profile"
+import Image from "next/image"
 import Link from "next/link"
-import { ThemeToggle } from "../theme-toggle"
+
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/hooks/use-auth"
+
+import UserProfile from "./user-profile"
+import { ThemeToggle } from "../theme-toggle"
 
 interface BreadcrumbItem {
   label: string

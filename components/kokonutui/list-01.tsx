@@ -1,5 +1,6 @@
-import { cn } from "@/lib/utils"
 import { ArrowUpRight, ArrowDownLeft, Wallet, SendHorizontal, QrCode, Plus, ArrowRight, CreditCard } from "lucide-react"
+
+import { cn } from "@/lib/utils"
 
 interface AccountItem {
   id: string
