@@ -8,30 +8,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
-
-interface ProfileData {
-  id: string
-  name: string | null
-  email: string
-  image: string | null
-  role: "ADMIN" | "USER"
-}
+import { userApi, type User } from "@/lib/api/user"
+import { isApiError } from "@/lib/api-error"
 
 export default function ProfilePage() {
   const { toast } = useToast()
   const { isAuthenticated } = useAuth()
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState<ProfileData | null>(null)
+  const [data, setData] = useState<User | null>(null)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("/api/user")
-        if (!res.ok) throw new Error("failed")
-        const json = await res.json()
-        setData(json.user)
-      } catch {
-        toast({ description: "프로필 정보를 불러오지 못했습니다.", variant: "destructive" })
+        const { user } = await userApi.getCurrentUser()
+        setData(user)
+      } catch (error) {
+        const message = isApiError(error) ? error.message : "프로필 정보를 불러오지 못했습니다."
+        toast({ description: message, variant: "destructive" })
       }
     }
     if (isAuthenticated) load()
@@ -41,15 +34,14 @@ export default function ProfilePage() {
     if (!data) return
     setLoading(true)
     try {
-      const res = await fetch("/api/user", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: data.name, image: data.image }),
+      await userApi.updateCurrentUser({ 
+        name: data.name ?? undefined, 
+        image: data.image ?? undefined 
       })
-      if (!res.ok) throw new Error("failed")
       toast({ description: "프로필이 업데이트되었습니다." })
-    } catch {
-      toast({ description: "업데이트에 실패했습니다.", variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "업데이트에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     } finally {
       setLoading(false)
     }
