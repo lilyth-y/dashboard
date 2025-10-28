@@ -42,7 +42,17 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     })
 
-    const shaped = projects.map((p) => ({
+    const shaped = projects.map((p: {
+      id: string
+      name: string
+      status: string
+      budget: number | null
+      startDate: Date | null
+      endDate: Date | null
+      createdAt: Date
+      createdBy: string
+      members: Array<{ role: string }>
+    }) => ({
       id: p.id,
       name: p.name,
       status: p.status,
