@@ -14,39 +14,27 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
+import {
+  type Milestone,
+  type MilestoneStatus,
+  milestonesApi,
+} from "@/lib/api/milestones"
+import {
+  type ProjectMember,
+  type ProjectMemberRole,
+  projectsApi,
+} from "@/lib/api/projects"
+import {
+  type Task,
+  type TaskStatus,
+  type Priority,
+  tasksApi,
+} from "@/lib/api/tasks"
+import { isApiError } from "@/lib/api-error"
 
-type ProjectMemberRole = "OWNER" | "MANAGER" | "MEMBER"
-
-type TaskStatus = "TODO" | "IN_PROGRESS" | "REVIEW" | "DONE"
-
-type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-
-type MilestoneStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED" | "OVERDUE"
-
-interface MemberItem {
-  userId: string
-  role: ProjectMemberRole
-  joinedAt: string
-  user: { name: string | null; email: string; image: string | null } | null
-}
-
-interface TaskItem {
-  id: string
-  title: string
-  description: string | null
-  status: TaskStatus
-  priority: Priority
-  assignedTo: string | null
-  dueDate: string | null
-}
-
-interface MilestoneItem {
-  id: string
-  title: string
-  description: string | null
-  status: MilestoneStatus
-  dueDate: string
-}
+type MemberItem = ProjectMember
+type TaskItem = Task
+type MilestoneItem = Milestone
 
 interface KanbanBoardProps {
   tasks: TaskItem[]
@@ -382,34 +370,31 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
   const loadMembers = useCallback(async () => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/members`)
-      if (!res.ok) throw new Error("failed")
-      const json = await res.json()
-      setMembers(json.members)
-    } catch {
-      toast({ description: "멤버를 불러오지 못했습니다.", variant: "destructive" })
+      const { members: data } = await projectsApi.getMembers(projectId)
+      setMembers(data)
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "멤버를 불러오지 못했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }, [projectId, toast])
 
   const loadTasks = useCallback(async () => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/tasks`)
-      if (!res.ok) throw new Error("failed")
-      const json = await res.json()
-      setTasks(json.tasks)
-    } catch {
-      toast({ description: "태스크를 불러오지 못했습니다.", variant: "destructive" })
+      const { tasks: data } = await tasksApi.list(projectId)
+      setTasks(data)
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "태스크를 불러오지 못했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }, [projectId, toast])
 
   const loadMilestones = useCallback(async () => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/milestones`)
-      if (!res.ok) throw new Error("failed")
-      const json = await res.json()
-      setMilestones(json.milestones)
-    } catch {
-      toast({ description: "마일스톤을 불러오지 못했습니다.", variant: "destructive" })
+      const { milestones: data } = await milestonesApi.list(projectId)
+      setMilestones(data)
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "마일스톤을 불러오지 못했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }, [projectId, toast])
 
@@ -419,73 +404,41 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     loadMilestones()
   }, [loadMembers, loadTasks, loadMilestones])
 
-  // Error helpers
-  const toErrorMessage = (e: unknown, fallback: string) =>
-    e instanceof Error && e.message ? e.message : fallback
-
-  const errorMessageFromResponse = async (
-    res: Response,
-    fallback: string,
-  ): Promise<string> => {
-    try {
-      const data: unknown = await res.json()
-      if (data && typeof data === 'object' && 'message' in data) {
-        const m = (data as { message?: unknown }).message
-        if (typeof m === 'string' && m.trim()) return m
-      }
-    } catch {}
-    return fallback
-  }
-
   // Member add
   const [inviteEmail, setInviteEmail] = useState("")
   const [inviteRole, setInviteRole] = useState<ProjectMemberRole>("MEMBER")
   const onInvite = async () => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/members`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
-      })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "멤버 추가에 실패했습니다."))
-      }
+      await projectsApi.addMember(projectId, { email: inviteEmail, role: inviteRole })
       setInviteEmail("")
       setInviteRole("MEMBER")
       await loadMembers()
       toast({ description: "멤버가 추가되었습니다." })
-    } catch (e: unknown) {
-      toast({ description: toErrorMessage(e, "멤버 추가에 실패했습니다."), variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "멤버 추가에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
   const onRoleChange = async (userId: string, role: ProjectMemberRole) => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/members/${userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-      })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "역할 변경에 실패했습니다."))
-      }
+      await projectsApi.updateMemberRole(projectId, userId, { role })
       await loadMembers()
       toast({ description: "역할이 변경되었습니다." })
-    } catch (e: unknown) {
-      toast({ description: toErrorMessage(e, "역할 변경에 실패했습니다."), variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "역할 변경에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
   const onRemove = async (userId: string) => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/members/${userId}`, { method: "DELETE" })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "멤버 제거에 실패했습니다."))
-      }
+      await projectsApi.removeMember(projectId, userId)
       await loadMembers()
       toast({ description: "멤버가 제거되었습니다." })
-    } catch (e: unknown) {
-      toast({ description: toErrorMessage(e, "멤버 제거에 실패했습니다."), variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "멤버 제거에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
@@ -497,14 +450,13 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [taskAssignee, setTaskAssignee] = useState<string | "UNASSIGNED">("UNASSIGNED")
   const onCreateTask = async () => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: taskTitle, description: taskDesc, priority: taskPriority, dueDate: taskDue || null, assignedTo: taskAssignee === "UNASSIGNED" ? null : taskAssignee }),
+      await tasksApi.create(projectId, {
+        title: taskTitle,
+        description: taskDesc,
+        priority: taskPriority,
+        dueDate: taskDue || null,
+        assignedTo: taskAssignee === "UNASSIGNED" ? null : taskAssignee,
       })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "태스크 생성에 실패했습니다."))
-      }
       setTaskTitle("")
       setTaskDesc("")
       setTaskPriority("MEDIUM")
@@ -512,8 +464,9 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       setTaskAssignee("UNASSIGNED")
       await loadTasks()
       toast({ description: "태스크가 생성되었습니다." })
-    } catch (e: unknown) {
-      toast({ description: toErrorMessage(e, "태스크 생성에 실패했습니다."), variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "태스크 생성에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
@@ -522,13 +475,11 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     patch: Partial<Pick<TaskItem, "status" | "priority" | "assignedTo" | "dueDate" | "title" | "description">>,
   ) => {
     try {
-      const res = await fetch(`/api/tasks/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "태스크 업데이트에 실패했습니다."))
-      }
+      await tasksApi.update(id, patch)
       await loadTasks()
-    } catch (e: unknown) {
-      toast({ description: toErrorMessage(e, "태스크 업데이트에 실패했습니다."), variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "태스크 업데이트에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
@@ -554,16 +505,13 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     // Optimistically remove the task
     setTasks((cur) => cur.filter((t) => t.id !== id))
     try {
-      const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "태스크 삭제에 실패했습니다."))
-      }
+      await tasksApi.delete(id)
       toast({ description: "태스크가 삭제되었습니다." })
-    } catch (e: unknown) {
+    } catch (error) {
       // Rollback on error
       setTasks(prev)
-      const msg = toErrorMessage(e, '태스크 삭제에 실패했습니다.')
-      toast({ description: msg, variant: "destructive" })
+      const message = isApiError(error) ? error.message : "태스크 삭제에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
@@ -573,45 +521,39 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [msDue, setMsDue] = useState("")
   const onCreateMilestone = async () => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/milestones`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: msTitle, description: msDesc, dueDate: msDue }),
+      await milestonesApi.create(projectId, {
+        title: msTitle,
+        description: msDesc,
+        dueDate: msDue,
       })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "마일스톤 생성에 실패했습니다."))
-      }
       setMsTitle("")
       setMsDesc("")
       setMsDue("")
       await loadMilestones()
       toast({ description: "마일스톤이 생성되었습니다." })
-    } catch (e: unknown) {
-      toast({ description: toErrorMessage(e, "마일스톤 생성에 실패했습니다."), variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "마일스톤 생성에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
   const onUpdateMilestone = async (id: string, patch: Partial<{ status: MilestoneStatus; title: string; description: string; dueDate: string }>) => {
     try {
-      const res = await fetch(`/api/milestones/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "마일스톤 업데이트에 실패했습니다."))
-      }
+      await milestonesApi.update(id, patch)
       await loadMilestones()
-    } catch (e: unknown) {
-      toast({ description: toErrorMessage(e, "마일스톤 업데이트에 실패했습니다."), variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "마일스톤 업데이트에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
   const onDeleteMilestone = async (id: string) => {
     try {
-      const res = await fetch(`/api/milestones/${id}`, { method: "DELETE" })
-      if (!res.ok) {
-        throw new Error(await errorMessageFromResponse(res, "마일스톤 삭제에 실패했습니다."))
-      }
+      await milestonesApi.delete(id)
       await loadMilestones()
-    } catch (e: unknown) {
-      toast({ description: toErrorMessage(e, "마일스톤 삭제에 실패했습니다."), variant: "destructive" })
+    } catch (error) {
+      const message = isApiError(error) ? error.message : "마일스톤 삭제에 실패했습니다."
+      toast({ description: message, variant: "destructive" })
     }
   }
 
