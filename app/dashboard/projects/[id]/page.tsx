@@ -8,7 +8,7 @@ import Layout from "@/components/kokonutui/layout"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -237,6 +237,7 @@ function TaskDetailDialog({
       <DialogContent aria-labelledby={headingId} onKeyDown={handleKeyDown}>
         <DialogHeader>
           <DialogTitle id={headingId}>태스크 상세</DialogTitle>
+          <DialogDescription>태스크의 정보를 확인하고 수정할 수 있습니다.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div>

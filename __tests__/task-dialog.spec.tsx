@@ -1,5 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act } from 'react'
 import React from 'react'
+
 import { TaskDetailDialog } from '@/app/dashboard/projects/[id]/page'
 
 const dummyTask = {
@@ -42,16 +44,23 @@ test('dialog focuses title and supports Enter/Escape', async () => {
   // Focus should be on title input
   const titleInput = screen.getByLabelText('제목') as HTMLInputElement
   expect(titleInput).toBeInTheDocument()
-  expect(document.activeElement).toBe(titleInput)
+  
+  // Wait for focus to be set (happens in useEffect)
+  await waitFor(() => {
+    expect(document.activeElement).toBe(titleInput)
+  })
 
   // Press Enter to save
-  fireEvent.keyDown(titleInput, { key: 'Enter' })
-  // onSaveTaskFields is debounced through a click on the save button
-  // allow microtasks to flush
-  await Promise.resolve()
+  await act(async () => {
+    fireEvent.keyDown(titleInput, { key: 'Enter' })
+    // allow microtasks to flush
+    await Promise.resolve()
+  })
   expect(onSaveTaskFields).toHaveBeenCalled()
 
   // Press Escape to close
-  fireEvent.keyDown(titleInput, { key: 'Escape' })
+  await act(async () => {
+    fireEvent.keyDown(titleInput, { key: 'Escape' })
+  })
   expect(onOpenChange).toHaveBeenCalledWith(false)
 })
