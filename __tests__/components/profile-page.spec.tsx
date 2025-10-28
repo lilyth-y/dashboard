@@ -25,6 +25,7 @@ describe('ProfilePage', () => {
       user: mockUser,
       isAuthenticated: true,
       isAdmin: false,
+      isUser: true,
       isLoading: false,
     })
   })
@@ -59,7 +60,7 @@ describe('ProfilePage', () => {
 
   test('allows user to update name', async () => {
     vi.mocked(userApi.getCurrentUser).mockResolvedValue({ user: mockUser })
-    vi.mocked(userApi.updateCurrentUser).mockResolvedValue({ user: { ...mockUser, name: 'Updated Name' } })
+    vi.mocked(userApi.updateCurrentUser).mockResolvedValue({ id: 'user1' })
 
     render(<ProfilePage />)
 
@@ -85,9 +86,7 @@ describe('ProfilePage', () => {
 
   test('allows user to update image URL', async () => {
     vi.mocked(userApi.getCurrentUser).mockResolvedValue({ user: mockUser })
-    vi.mocked(userApi.updateCurrentUser).mockResolvedValue({ 
-      user: { ...mockUser, image: 'https://example.com/new-avatar.jpg' } 
-    })
+    vi.mocked(userApi.updateCurrentUser).mockResolvedValue({ id: 'user1' })
 
     render(<ProfilePage />)
 
@@ -130,7 +129,7 @@ describe('ProfilePage', () => {
   test('shows loading state during save', async () => {
     vi.mocked(userApi.getCurrentUser).mockResolvedValue({ user: mockUser })
     vi.mocked(userApi.updateCurrentUser).mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ user: mockUser }), 100))
+      () => new Promise((resolve) => setTimeout(() => resolve({ id: 'user1' }), 100))
     )
 
     render(<ProfilePage />)
@@ -170,9 +169,10 @@ describe('ProfilePage', () => {
 
   test('does not load data when not authenticated', () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: null,
+      user: undefined,
       isAuthenticated: false,
       isAdmin: false,
+      isUser: false,
       isLoading: false,
     })
 
