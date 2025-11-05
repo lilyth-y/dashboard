@@ -1,6 +1,7 @@
 "use client"
 
 import { Plus } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 import TransactionForm from "@/components/kokonutui/transaction-form"
@@ -9,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 
 export default function TransactionsPage() {
   const [showForm, setShowForm] = useState(false)
+  const router = useRouter()
 
   const handleTransactionSuccess = () => {
     setShowForm(false)
@@ -47,7 +49,7 @@ export default function TransactionsPage() {
         <Button 
           variant="outline" 
           className="mt-4" 
-          onClick={() => window.location.href = '/dashboard'}
+          onClick={() => router.push('/dashboard')}
         >
           대시보드로 이동
         </Button>

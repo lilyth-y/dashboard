@@ -23,7 +23,7 @@ const mockProjects = [
   {
     id: 'p1',
     name: 'Test Project 1',
-    status: 'IN_PROGRESS' as const,
+    status: 'ACTIVE' as const,
     budget: 10000,
     startDate: '2025-01-01',
     endDate: '2025-12-31',
@@ -51,6 +51,7 @@ describe('ProjectsPage', () => {
       user: { id: 'user1', email: 'test@example.com', name: 'Test User', role: 'USER' },
       isAuthenticated: true,
       isAdmin: false,
+      isUser: true,
       isLoading: false,
     })
   })
@@ -79,7 +80,7 @@ describe('ProjectsPage', () => {
     })
 
     // Check status is displayed
-    expect(screen.getByText('IN_PROGRESS')).toBeInTheDocument()
+    expect(screen.getByText('ACTIVE')).toBeInTheDocument()
     expect(screen.getByText('PLANNING')).toBeInTheDocument()
 
     // Check budget is displayed
@@ -139,6 +140,7 @@ describe('ProjectsPage', () => {
       user: { id: 'admin1', email: 'admin@example.com', name: 'Admin User', role: 'ADMIN' },
       isAuthenticated: true,
       isAdmin: true,
+      isUser: false,
       isLoading: false,
     })
     vi.mocked(projectsApi.list).mockResolvedValue({ projects: mockProjects })
@@ -160,17 +162,7 @@ describe('ProjectsPage', () => {
 
   test('creates new project successfully', async () => {
     vi.mocked(projectsApi.list).mockResolvedValue({ projects: [] })
-    vi.mocked(projectsApi.create).mockResolvedValue({
-      id: 'p3',
-      name: 'New Project',
-      status: 'PLANNING',
-      budget: null,
-      startDate: null,
-      endDate: null,
-      createdAt: '2025-01-03T00:00:00Z',
-      createdBy: 'user1',
-      myRole: 'OWNER',
-    })
+    vi.mocked(projectsApi.create).mockResolvedValue({ id: 'p3' })
 
     render(<ProjectsPage />)
 
@@ -205,7 +197,7 @@ describe('ProjectsPage', () => {
 
   test('deletes project successfully', async () => {
     vi.mocked(projectsApi.list).mockResolvedValue({ projects: mockProjects })
-    vi.mocked(projectsApi.delete).mockResolvedValue(undefined)
+    vi.mocked(projectsApi.delete).mockResolvedValue({ ok: true })
 
     render(<ProjectsPage />)
 

@@ -12,6 +12,9 @@ const dummyTask = {
   priority: 'MEDIUM',
   assignedTo: null,
   dueDate: null,
+  projectId: 'p1',
+  createdAt: '2025-01-01T00:00:00Z',
+  createdBy: 'user1',
 } as const
 
 function Wrapper({ children }: { children: React.ReactNode }) {

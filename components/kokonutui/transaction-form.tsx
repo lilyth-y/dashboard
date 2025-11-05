@@ -143,7 +143,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+  <form data-testid="transaction-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* 거래 유형 */}
           <div className="space-y-2">
             <Label>거래 유형</Label>
@@ -231,12 +231,12 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
           {projects.length > 0 && (
             <div className="space-y-2">
               <Label htmlFor="project">프로젝트 (선택사항)</Label>
-              <Select onValueChange={(value) => setValue('projectId', value || undefined)}>
+              <Select onValueChange={(value) => setValue('projectId', value === 'none' ? undefined : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="프로젝트를 선택하세요" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">프로젝트 없음</SelectItem>
+                  <SelectItem value="none">프로젝트 없음</SelectItem>
                   {projects.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       {project.name}
