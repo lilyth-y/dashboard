@@ -69,6 +69,7 @@ function KanbanBoard({ tasks, canManage, onDropStatus, onDelete, onAssign, membe
           <div
             key={col.status}
             className={`rounded-md border ${isOver ? "border-primary" : "border-dashed border-muted"} bg-background/30 p-3 min-h-[160px]`}
+            data-status={col.status}
             onDragOver={(e) => {
               if (!canManage) return
               e.preventDefault()

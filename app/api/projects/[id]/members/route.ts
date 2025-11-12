@@ -24,13 +24,13 @@ async function canManage(projectId: string, userId: string, isAdmin: boolean) {
 }
 
 // GET members
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
-    const projectId = params.id
+    const { id: projectId } = await params
     const allowed = await canView(projectId, session.user.id, isAdmin)
     if (!allowed) throw ApiError.forbidden()
 
@@ -61,13 +61,13 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 }
 
 // POST add member { userId? , email?, role }
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) throw ApiError.unauthorized()
 
     const isAdmin = session.user.role === "ADMIN"
-    const projectId = params.id
+    const { id: projectId } = await params
     const allowed = await canManage(projectId, session.user.id, isAdmin)
     if (!allowed) throw ApiError.forbidden()
 

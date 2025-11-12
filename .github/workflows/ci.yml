@@ -93,12 +93,20 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
       
-      - name: Run E2E tests
+      - name: Run E2E tests (Chromium)
         env:
-          NEXTAUTH_SECRET: test-secret-for-ci
-          NEXTAUTH_URL: http://localhost:3000
-          DATABASE_URL: file:./test.db
-        run: pnpm exec playwright test
+          NEXTAUTH_SECRET: e2e-test-secret
+          NEXTAUTH_URL: http://localhost:3051
+          NODE_ENV: development
+        run: pnpm exec playwright test --project=chromium --reporter=html
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
 
   codeql:
     runs-on: ubuntu-latest

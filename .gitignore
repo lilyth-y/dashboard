@@ -29,5 +29,9 @@ next-env.d.ts
 # test coverage
 coverage/
 
+# test results
+test-results/
+playwright-report/
+
 # local databases
 prisma/*.db

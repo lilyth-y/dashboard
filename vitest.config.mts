@@ -15,6 +15,10 @@ export default defineConfig({
     css: false,
     globals: true,
     exclude: ['**/node_modules/**', '**/e2e/**', '**/.next/**'],
+    // Add jest-dom types for better TypeScript support
+    typecheck: {
+      enabled: true,
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

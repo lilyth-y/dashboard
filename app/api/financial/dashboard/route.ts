@@ -63,7 +63,7 @@ export async function GET() {
         DATE(date) as date,
         type,
         SUM(amount) as total
-      FROM Transaction 
+      FROM "Transaction" 
       WHERE date >= ${thirtyDaysAgo}
       GROUP BY DATE(date), type
       ORDER BY date DESC

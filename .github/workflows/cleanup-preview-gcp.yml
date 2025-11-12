@@ -13,6 +13,11 @@ env:
   GCP_REGION: asia-northeast3
   SERVICE_NAME_PREFIX: dashboard-pr
 
+# Required GitHub Secrets (configure in Settings > Secrets and variables > Actions):
+# - WORKLOAD_IDENTITY_PROVIDER: GCP Workload Identity Provider resource name
+# - GCP_SA_EMAIL: GCP Service Account email for Workload Identity
+# - GCP_PROJECT_ID: GCP Project ID where Cloud Run services are deployed
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest

@@ -16,17 +16,22 @@ async function canManageByTask(taskId: string, userId: string, isAdmin: boolean)
   return member?.role === "OWNER" || member?.role === "MANAGER"
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) throw ApiError.unauthorized()
     const isAdmin = session.user.role === "ADMIN"
 
-    const taskId = params.id
+    const { id: taskId } = await params
     const allowed = await canManageByTask(taskId, session.user.id, isAdmin)
     if (!allowed) throw ApiError.forbidden()
 
-    const body = await req.json()
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
+    }
     const { title, description, status, priority, assignedTo, dueDate } = body as {
       title?: string
       description?: string | null
@@ -63,13 +68,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) throw ApiError.unauthorized()
     const isAdmin = session.user.role === "ADMIN"
 
-    const taskId = params.id
+    const { id: taskId } = await params
     const allowed = await canManageByTask(taskId, session.user.id, isAdmin)
     if (!allowed) throw ApiError.forbidden()
 

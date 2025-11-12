@@ -31,19 +31,23 @@ export default function ProfilePage() {
   }, [isAuthenticated, toast])
 
   const onSave = async () => {
-    if (!data) return
-    setLoading(true)
+    if (!data) return;
+    if (!data.name || !data.name.trim()) {
+      toast({ description: "이름을 입력해주세요.", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
     try {
       await userApi.updateCurrentUser({ 
         name: data.name ?? undefined, 
         image: data.image ?? undefined 
-      })
-      toast({ description: "프로필이 업데이트되었습니다." })
+      });
+      toast({ description: "프로필이 업데이트되었습니다." });
     } catch (error) {
-      const message = isApiError(error) ? error.message : "업데이트에 실패했습니다."
-      toast({ description: message, variant: "destructive" })
+      const message = isApiError(error) ? error.message : "업데이트에 실패했습니다.";
+      toast({ description: message, variant: "destructive" });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 

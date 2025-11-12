@@ -13,10 +13,12 @@ export const authOptions: NextAuthOptions = {
   // Cast to NextAuth Adapter to resolve type mismatch between @auth/prisma-adapter and next-auth v4 types
   adapter: PrismaAdapter(prisma) as unknown as Adapter,
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [GoogleProvider({
+          clientId: process.env.GOOGLE_CLIENT_ID as string,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        })]
+      : []),
     CredentialsProvider({
       name: "credentials",
       credentials: {

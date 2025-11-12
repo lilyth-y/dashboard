@@ -50,7 +50,7 @@ export const handlers = [
       return HttpResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
     }
 
-    const taskId = params.id as string;
+    const taskId = params.id;
     if (taskId === 'forbidden-task') {
       return HttpResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -65,7 +65,7 @@ export const handlers = [
       return HttpResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
     }
 
-    const taskId = params.id as string;
+    const taskId = params.id;
     if (taskId === 'forbidden-task') {
       return HttpResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -175,7 +175,7 @@ export const handlers = [
       return HttpResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
     }
 
-    const projectId = params.id as string;
+    const projectId = params.id;
     if (projectId === 'forbidden-proj') {
       return HttpResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -195,7 +195,7 @@ export const handlers = [
       return HttpResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
     }
 
-    const milestoneId = params.id as string;
+    const milestoneId = params.id;
     if (milestoneId === 'forbidden-milestone') {
       return HttpResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -207,10 +207,10 @@ export const handlers = [
   http.delete(`${BASE_URL}/api/milestones/:id`, ({ request, params }) => {
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
-      return HttpResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+      return HttpResponse.json({ error: '인증이 없습니다.' }, { status: 401 });
     }
 
-    const milestoneId = params.id as string;
+    const milestoneId = params.id;
     if (milestoneId === 'forbidden-milestone') {
       return HttpResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }

@@ -3,6 +3,13 @@ import { beforeAll, afterEach, afterAll } from 'vitest';
 
 import { server } from './__tests__/mocks/server';
 
+// Mock ResizeObserver for dialog tests
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 // Establish API mocking before all tests
 beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
 

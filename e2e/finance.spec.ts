@@ -9,6 +9,25 @@ async function login(page: Page) {
   await page.waitForURL('/dashboard')
 }
 
+// Mock financial dashboard response used to stabilize E2E runs
+const mockFinancial = {
+  recentTransactions: [
+    {
+      id: 'tx-1',
+      amount: 50000,
+      type: 'INCOME',
+      category: 'SALES',
+      description: 'Mocked Sale',
+      date: new Date().toISOString(),
+      project: { name: 'Seed Project' }
+    }
+  ],
+  monthlyStats: [ { type: 'INCOME', _sum: { amount: 50000 } } ],
+  expensesByCategory: [ { category: 'SALES', type: 'INCOME', _sum: { amount: 50000 } } ],
+  dailyTrends: [ { date: new Date().toISOString(), type: 'INCOME', total: 50000 } ],
+  summary: { totalIncome: 50000, totalExpense: 0, netProfit: 50000 }
+}
+
 test.describe('Financial Management', () => {
   test.beforeEach(async ({ page }) => {
     // Surface browser console errors to test output for debugging
@@ -24,6 +43,15 @@ test.describe('Financial Management', () => {
       // eslint-disable-next-line no-console
       console.log('PAGEERROR:', err.message);
     })
+    // Intercept the financial dashboard API and return stable fixture to avoid external DB/session flakiness
+    await page.route('**/api/financial/dashboard', async (route) => {
+      await route.fulfill({
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mockFinancial)
+      })
+    })
+
     await login(page)
   })
 
