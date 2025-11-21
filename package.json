@@ -123,7 +123,7 @@
     "lint-staged": "^15.5.2",
     "msw": "^2.12.1",
     "postcss": "^8.5",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.1.17",
     "tsx": "^4.20.6",
     "typescript": "^5",
     "typescript-eslint": "^8.46.2",
