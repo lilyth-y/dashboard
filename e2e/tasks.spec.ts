@@ -69,8 +69,9 @@ test.describe('Task Lifecycle', () => {
   });
 
   test('should edit task details', async ({ page }) => {
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     // Click on task card to open detail dialog
-    await page.click('text=E2E Test Task');
+    await page.locator('text=E2E Test Task').first().click();
     
     // Dialog should open
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -92,7 +93,7 @@ test.describe('Task Lifecycle', () => {
     });
     
     // Updated title should be visible
-    await expect(page.getByText('Updated E2E Task')).toBeVisible();
+    await expect(page.getByText('Updated E2E Task').first()).toBeVisible();
   });
 
   test('should delete task', async ({ page }) => {

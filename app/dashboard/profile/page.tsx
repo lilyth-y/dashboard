@@ -20,9 +20,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const load = async () => {
       try {
+        console.log('Fetching user profile...');
         const { user } = await userApi.getCurrentUser()
+        console.log('User profile loaded:', user);
         setData(user)
       } catch (error) {
+        console.error('Error loading profile:', error);
         const message = isApiError(error) ? error.message : "프로필 정보를 불러오지 못했습니다."
         toast({ description: message, variant: "destructive" })
       }
@@ -31,8 +34,10 @@ export default function ProfilePage() {
   }, [isAuthenticated, toast])
 
   const onSave = async () => {
+    console.log('onSave called', data);
     if (!data) return;
     if (!data.name || !data.name.trim()) {
+      console.log('Validation failed: Name is empty');
       toast({ description: "이름을 입력해주세요.", variant: "destructive" });
       return;
     }

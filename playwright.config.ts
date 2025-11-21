@@ -7,13 +7,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: 1,
   reporter: 'html',
-  use: {
-    baseURL: 'http://localhost:3001',
+    timeout: 60000,
+    use: {
+    baseURL: 'http://127.0.0.1:3051',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-  },
-
-  projects: [
+    actionTimeout: 15000,
+    navigationTimeout: 30000,
+  },  projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
@@ -29,14 +30,15 @@ export default defineConfig({
     // },
   ],
 
-  // webServer: {
-  //   command: 'pnpm dev',
-  //   url: 'http://localhost:3001',
-  //   reuseExistingServer: !process.env.CI,
-  //   env: {
-  //     NEXTAUTH_URL: 'http://localhost:3001',
-  //     NEXTAUTH_SECRET: 'e2e-test-secret',
-  //     NODE_ENV: 'development'
-  //   }
-  // },
+  webServer: {
+    command: 'cmd /c pnpm start -p 3051',
+    url: 'http://127.0.0.1:3051',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+    env: {
+      NEXTAUTH_URL: 'http://127.0.0.1:3051',
+      NEXTAUTH_SECRET: 'e2e-test-secret',
+      NODE_ENV: 'production'
+    }
+  },
 });

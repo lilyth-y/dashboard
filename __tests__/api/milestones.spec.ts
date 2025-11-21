@@ -114,7 +114,7 @@ describe('DELETE /api/milestones/:id', () => {
     const data = await res.json();
 
     expect(res.status).toBe(401);
-    expect(data.error).toBe('인증이 필요합니다.');
+    expect(data.error).toBe('인증이 없습니다.');
   });
 
   it('should return 403 when user lacks permission', async () => {

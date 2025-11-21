@@ -92,17 +92,21 @@ test.describe('Profile Management', () => {
   })
 
   test('should show validation error for empty name', async ({ page }) => {
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     await page.goto('/dashboard/profile')
     
-    // Clear name field
+    // Wait for form to load and have data
     const nameInput = page.locator('label:has-text("이름") + input, div:has(> label:has-text("이름")) input').first()
-    await nameInput.clear()
+    await expect(nameInput).not.toHaveValue('', { timeout: 10000 })
+    
+    // Clear name field
+    await nameInput.fill('')
+    await expect(nameInput).toHaveValue('')
     
     // Try to save
     await page.click('button:has-text("저장")')
     
-    // Should see validation error or prevent submission
-    const nameValue = await nameInput.inputValue()
-    expect(nameValue.length).toBeGreaterThan(0) // Form should prevent empty submission
+    // Should see validation error toast
+    await expect(page.getByText('이름을 입력해주세요.')).toBeVisible()
   })
 })

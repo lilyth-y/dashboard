@@ -658,12 +658,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     if (filterFrom) params.set("from", filterFrom); else params.delete("from")
     if (filterTo) params.set("to", filterTo); else params.delete("to")
     if (selectedDate) params.set("ms", selectedDate.toISOString().split("T")[0]); else params.delete("ms")
-    // task deep-link
-    if (dialogOpen && activeTask?.id) {
-      params.set("task", activeTask.id)
-    } else {
-      params.delete("task")
-    }
+    
     router.replace(`${pathname}?${params.toString()}`)
 
     if (typeof window !== "undefined") {
@@ -683,14 +678,16 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     if (qTask) {
       const t = tasks.find((tt) => tt.id === qTask)
       if (t) {
-        setActiveTask(t)
-        setDialogOpen(true)
+        if (activeTask?.id !== t.id) {
+          setActiveTask(t)
+          setDialogOpen(true)
+        } else if (activeTask !== t) {
+          setActiveTask(t)
+        }
       }
-    }
-    // If task param removed externally, close dialog
-    if (!qTask && dialogOpen) {
-      setDialogOpen(false)
-      setActiveTask(null)
+    } else {
+      if (dialogOpen) setDialogOpen(false)
+      if (activeTask) setActiveTask(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, tasks])
@@ -885,6 +882,9 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
               onTaskClick={(t) => {
                 setActiveTask(t)
                 setDialogOpen(true)
+                const params = new URLSearchParams(searchParams.toString())
+                params.set("task", t.id)
+                router.replace(`${pathname}?${params.toString()}`)
               }}
             />
             {/* Task detail dialog at parent level for deep-link */}
@@ -892,7 +892,11 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
               open={dialogOpen}
               onOpenChange={(v) => {
                 setDialogOpen(v)
-                if (!v) setActiveTask(null)
+                if (!v) {
+                  const params = new URLSearchParams(searchParams.toString())
+                  params.delete("task")
+                  router.replace(`${pathname}?${params.toString()}`)
+                }
               }}
               task={activeTask}
               canManage={canManage(myRole)}

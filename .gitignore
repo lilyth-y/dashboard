@@ -35,3 +35,9 @@ playwright-report/
 
 # local databases
 prisma/*.db
+
+# python venv
+venv/
+ml-service/venv/
+__pycache__/
+*.pyc
