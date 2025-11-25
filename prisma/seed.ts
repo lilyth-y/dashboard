@@ -194,7 +194,16 @@ async function main() {
 
   // 예산 생성
   // 예산 생성: createMany는 중복 시 실패할 수 있으므로 idempotent하게 존재 여부 확인 후 생성합니다.
-  const budgets = [
+  type BudgetInput = {
+    category: string
+    amount: number
+    period: string
+    year: number
+    month: number
+    createdBy: string
+  }
+
+  const budgets: BudgetInput[] = [
     {
       category: 'SALARY',
       amount: 10000000,
@@ -232,7 +241,16 @@ async function main() {
     })
 
     if (!exists) {
-      await prisma.budget.create({ data: b })
+      await prisma.budget.create({
+        data: {
+          category: b.category,
+          amount: b.amount,
+          period: b.period,
+          year: b.year,
+          month: b.month,
+          createdBy: b.createdBy,
+        },
+      })
     }
   }
 
