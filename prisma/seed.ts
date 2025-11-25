@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, TransactionCategory, BudgetPeriod } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -195,9 +195,9 @@ async function main() {
   // 예산 생성
   // 예산 생성: createMany는 중복 시 실패할 수 있으므로 idempotent하게 존재 여부 확인 후 생성합니다.
   type BudgetInput = {
-    category: string
+    category: TransactionCategory
     amount: number
-    period: string
+    period: BudgetPeriod
     year: number
     month: number
     createdBy: string
