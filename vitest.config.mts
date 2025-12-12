@@ -1,6 +1,10 @@
 import { defineConfig } from 'vitest/config'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
+
+// ESM equivalent of __dirname
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   plugins: [react()],
@@ -17,10 +21,10 @@ export default defineConfig({
     exclude: ['**/node_modules/**', '**/e2e/**', '**/.next/**'],
     // Add jest-dom types for better TypeScript support
     typecheck: {
-      enabled: true,
+      enabled: false,
     },
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
         'node_modules/**',

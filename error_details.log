@@ -1,0 +1,19 @@
+
+ RUN  v2.1.9 C:/startup/dashboard
+
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+SyntaxError: The requested module 'vitest/node' does not provide an export named 'isCSSRequest'
+ ❯ ModuleJob._instantiate node:internal/modules/esm/module_job:182:21
+ ❯ ModuleJob.run node:internal/modules/esm/module_job:266:5
+ ❯ onImport.tracePromise.__proto__ node:internal/modules/esm/loader:644:26
+ ❯ Object.getProvider node_modules/.pnpm/@vitest+coverage-istanbul@4_bb629ae6750313c58427289c1150f7a2/node_modules/@vitest/coverage-istanbul/dist/index.js:31:40
+ ❯ Vitest.initCoverageProvider node_modules/.pnpm/vitest@2.1.9_@types+node@22_5cd10a0e5ab3901350c47cb9ee1eeacf/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10582:29
+ ❯ Vitest.start node_modules/.pnpm/vitest@2.1.9_@types+node@22_5cd10a0e5ab3901350c47cb9ee1eeacf/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10662:7
+ ❯ startVitest node_modules/.pnpm/vitest@2.1.9_@types+node@22_5cd10a0e5ab3901350c47cb9ee1eeacf/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:11848:7
+ ❯ start node_modules/.pnpm/vitest@2.1.9_@types+node@22_5cd10a0e5ab3901350c47cb9ee1eeacf/node_modules/vitest/dist/chunks/cac.CB_9Zo9Q.js:1506:17
+ ❯ CAC.run node_modules/.pnpm/vitest@2.1.9_@types+node@22_5cd10a0e5ab3901350c47cb9ee1eeacf/node_modules/vitest/dist/chunks/cac.CB_9Zo9Q.js:1486:3
+
+
+
+

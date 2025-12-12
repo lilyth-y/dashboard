@@ -1,0 +1,276 @@
+Loaded  vitest@4.0.15  and  @vitest/coverage-istanbul@2.1.9 .
+Running mixed versions is not supported and may lead into bugs
+Update your dependencies and make sure the versions match.
+
+ RUN  v4.0.15 C:/startup/dashboard
+      Coverage enabled with istanbul
+
+ ✓ __tests__/api/financial.spec.ts (7 tests) 92ms
+ ✓ __tests__/api/milestones.spec.ts (12 tests) 105ms
+stderr | __tests__/api/projects-api.spec.ts > /api/projects API Routes > GET /api/projects > should return 401 when user is not authenticated
+Projects fetch error: ApiError: 인증이 필요합니다.
+    at Function.unauthorized (C:/startup/dashboard/lib/api-error.ts:38:3)
+    at Module.GET (C:/startup/dashboard/app/api/projects/route.ts:20:14)
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at C:/startup/dashboard/__tests__/api/projects-api.spec.ts:41:24
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:20 {
+  statusCode: [33m401[39m,
+  code: [90mundefined[39m
+}
+
+stderr | __tests__/api/projects-api.spec.ts > /api/projects API Routes > GET /api/projects > should handle database errors gracefully
+Projects fetch error: Error: Database error
+    at C:/startup/dashboard/__tests__/api/projects-api.spec.ts:127:53
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:145:11
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:26
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1240:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1206:10[90m)[39m
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1650:37
+    at Traces.$ [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/vitest@4.0.15_@types+node@2_4bdbd3f04fac443c919e04c2017ff7e5/node_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27[90m)[39m
+    at trace [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/vitest@4.0.15_@types+node@2_4bdbd3f04fac443c919e04c2017ff7e5/node_modules/[4mvitest[24m/dist/chunks/test.BT8LKgU9.js:239:21[90m)[39m
+    at runTest [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1650:12[90m)[39m
+
+stderr | __tests__/api/projects-api.spec.ts > /api/projects API Routes > POST /api/projects > should return 401 when user is not authenticated
+Project create error: ApiError: 인증이 필요합니다.
+    at Function.unauthorized (C:/startup/dashboard/lib/api-error.ts:38:3)
+    at Module.POST (C:/startup/dashboard/app/api/projects/route.ts:125:20)
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at C:/startup/dashboard/__tests__/api/projects-api.spec.ts:146:24
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:20 {
+  statusCode: [33m401[39m,
+  code: [90mundefined[39m
+}
+
+stderr | __tests__/api/projects-api.spec.ts > /api/projects API Routes > POST /api/projects > should return 400 when project name is missing
+Project create error: ApiError: 프로젝트 이름은 필수입니다.
+    at Function.badRequest (C:/startup/dashboard/lib/api-error.ts:31:3)
+    at Module.POST (C:/startup/dashboard/app/api/projects/route.ts:983:44)
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at C:/startup/dashboard/__tests__/api/projects-api.spec.ts:165:24
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:20 {
+  statusCode: [33m400[39m,
+  code: [32m'PROJECT_NAME_REQUIRED'[39m
+}
+
+stderr | __tests__/api/projects-api.spec.ts > /api/projects API Routes > POST /api/projects > should return 400 when project name is empty
+Project create error: ApiError: 프로젝트 이름은 필수입니다.
+    at Function.badRequest (C:/startup/dashboard/lib/api-error.ts:31:3)
+    at Module.POST (C:/startup/dashboard/app/api/projects/route.ts:983:44)
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at C:/startup/dashboard/__tests__/api/projects-api.spec.ts:184:24
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:20 {
+  statusCode: [33m400[39m,
+  code: [32m'PROJECT_NAME_REQUIRED'[39m
+}
+
+stderr | __tests__/api/projects-api.spec.ts > /api/projects API Routes > POST /api/projects > should handle database creation errors
+Project create error: Error: Database error
+    at C:/startup/dashboard/__tests__/api/projects-api.spec.ts:277:51
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:145:11
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:26
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1240:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1206:10[90m)[39m
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1650:37
+    at Traces.$ [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/vitest@4.0.15_@types+node@2_4bdbd3f04fac443c919e04c2017ff7e5/node_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27[90m)[39m
+    at trace [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/vitest@4.0.15_@types+node@2_4bdbd3f04fac443c919e04c2017ff7e5/node_modules/[4mvitest[24m/dist/chunks/test.BT8LKgU9.js:239:21[90m)[39m
+    at runTest [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1650:12[90m)[39m
+
+ ✓ __tests__/api/projects-api.spec.ts (10 tests) 50ms
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > renders profile page and loads user data
+Fetching user profile...
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > renders profile page and loads user data
+User profile loaded: {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Test User'[39m,
+  image: [32m'https://example.com/avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > displays user information correctly
+Fetching user profile...
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > displays user information correctly
+User profile loaded: {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Test User'[39m,
+  image: [32m'https://example.com/avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > allows user to update name
+Fetching user profile...
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > allows user to update name
+User profile loaded: {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Test User'[39m,
+  image: [32m'https://example.com/avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > allows user to update name
+onSave called {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Updated Name'[39m,
+  image: [32m'https://example.com/avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > allows user to update image URL
+Fetching user profile...
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > allows user to update image URL
+User profile loaded: {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Test User'[39m,
+  image: [32m'https://example.com/avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > allows user to update image URL
+onSave called {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Test User'[39m,
+  image: [32m'https://example.com/new-avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > email and role fields are disabled
+Fetching user profile...
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > email and role fields are disabled
+User profile loaded: {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Test User'[39m,
+  image: [32m'https://example.com/avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > shows loading state during save
+Fetching user profile...
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > shows loading state during save
+User profile loaded: {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Test User'[39m,
+  image: [32m'https://example.com/avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > shows loading state during save
+onSave called {
+  id: [32m'user1'[39m,
+  email: [32m'test@example.com'[39m,
+  name: [32m'Test User'[39m,
+  image: [32m'https://example.com/avatar.jpg'[39m,
+  role: [32m'USER'[39m
+}
+
+stdout | __tests__/components/profile-page.spec.tsx > ProfilePage > handles error when loading user data fails
+Fetching user profile...
+
+stderr | __tests__/components/profile-page.spec.tsx > ProfilePage > handles error when loading user data fails
+Error loading profile: Error: Failed to load
+    at C:/startup/dashboard/__tests__/components/profile-page.spec.tsx:157:57
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:145:11
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:26
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1240:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1206:10[90m)[39m
+    at [90mfile:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1650:37
+    at Traces.$ [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/vitest@4.0.15_@types+node@2_4bdbd3f04fac443c919e04c2017ff7e5/node_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27[90m)[39m
+    at trace [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/vitest@4.0.15_@types+node@2_4bdbd3f04fac443c919e04c2017ff7e5/node_modules/[4mvitest[24m/dist/chunks/test.BT8LKgU9.js:239:21[90m)[39m
+    at runTest [90m(file:///C:/startup/dashboard/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:1650:12[90m)[39m
+
+ ✓ __tests__/components/profile-page.spec.tsx (8 tests) 563ms
+ ✓ __tests__/api/projects.spec.ts (6 tests) 84ms
+ ✓ __tests__/components/finance-pages.spec.tsx (10 tests) 769ms
+ ✓ __tests__/api/tasks.spec.ts (6 tests) 65ms
+ ✓ __tests__/hooks/use-auth.spec.ts (4 tests) 45ms
+ ✓ __tests__/components/projects-page.spec.tsx (8 tests) 1509ms
+     ✓ creates new project successfully  583ms
+ ✓ __tests__/api/user.spec.ts (4 tests) 110ms
+ ✓ __tests__/components/ui-components.spec.tsx (6 tests) 108ms
+ ✓ __tests__/components/ui/dialog.spec.tsx (2 tests) 383ms
+     ✓ opens content when trigger is clicked  304ms
+ ✓ __tests__/components/layout.spec.tsx (3 tests) 278ms
+ ✓ __tests__/hooks/use-mobile.spec.tsx (2 tests) 34ms
+ ❯ __tests__/components/ui/card.spec.tsx (2 tests | 1 failed) 99ms
+     ✓ renders card with all subcomponents 77ms
+     × applies custom classNames 15ms
+ ✓ __tests__/components/dashboard-pages.spec.tsx (5 tests) 464ms
+ ✓ __tests__/components/ui/accordion.spec.tsx (1 test) 259ms
+stderr | __tests__/task-dialog.spec.tsx > dialog focuses title and supports Enter/Escape
+`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+
+ ✓ __tests__/task-dialog.spec.tsx (1 test) 326ms
+   ✓ dialog focuses title and supports Enter/Escape  319ms
+ ✓ __tests__/components/ui/button.spec.tsx (4 tests) 196ms
+ ✓ __tests__/components/ui/avatar.spec.tsx (3 tests) 84ms
+ ✓ __tests__/components/ui/tabs.spec.tsx (1 test) 248ms
+ ✓ __tests__/components/ui/dropdown-menu.spec.tsx (1 test) 312ms
+     ✓ opens menu on click  305ms
+ ✓ __tests__/components/ui/badge.spec.tsx (4 tests) 95ms
+ ✓ __tests__/components/ui/input.spec.tsx (3 tests) 80ms
+ ✓ __tests__/lib/utils.spec.ts (3 tests) 18ms
+ ✓ __tests__/components/ui/switch.spec.tsx (1 test) 271ms
+ ✓ __tests__/components/ui/checkbox.spec.tsx (1 test) 311ms
+     ✓ toggles check state  305ms
+ ✓ __tests__/components/auth-provider.spec.tsx (1 test) 41ms
+ ✓ __tests__/components/ui/skeleton.spec.tsx (1 test) 29ms
+ ✓ __tests__/components/ui/separator.spec.tsx (2 tests) 34ms
+ ✓ __tests__/components/ui/label.spec.tsx (1 test) 34ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  __tests__/integration/auth-api.spec.ts [ __tests__/integration/auth-api.spec.ts ]
+ FAIL  __tests__/integration/projects-api.spec.ts [ __tests__/integration/projects-api.spec.ts ]
+ FAIL  __tests__/integration/tasks-api.spec.ts [ __tests__/integration/tasks-api.spec.ts ]
+Error: Cannot find module '.prisma/client/default'
+Require stack:
+- C:\startup\dashboard\node_modules\.pnpm\@prisma+client@6.19.0_prism_0c1b45691c37f39ab25566bd4670c33d\node_modules\@prisma\client\default.js
+ ❯ Object.<anonymous> node_modules/.pnpm/@prisma+client@6.19.0_prism_0c1b45691c37f39ab25566bd4670c33d/node_modules/@prisma/client/default.js:2:6
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  __tests__/components/ui/card.spec.tsx > Card > applies custom classNames
+Error: [2mexpect([22m[31melement[39m[2m).toHaveClass([22m[32m[32m"custom-header"[32m[39m[2m)[22m
+
+Expected the element to have class:
+[32m  custom-header[39m
+Received:
+[31m  rounded-lg border bg-card text-card-foreground shadow-sm custom-card[39m
+ ❯ __tests__/components/ui/card.spec.tsx:38:55
+     36|      )
+     37|      // Use a container lookup or direct text lookup
+     38|      expect(screen.getByText('Header').parentElement).toHaveClass('cus…
+       |                                                       ^
+     39|      expect(screen.getByText('Content')).toHaveClass('custom-content')
+     40|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+ Test Files  4 failed | 30 passed (34)
+      Tests  1 failed | 122 passed (123)
+   Start at  16:01:05
+   Duration  20.08s (transform 6.64s, setup 20.03s, import 31.20s, tests 7.09s, environment 56.54s)
+

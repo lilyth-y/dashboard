@@ -114,6 +114,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/coverage-istanbul": "^4.0.15",
     "eslint": "^9.37.0",
     "eslint-config-next": "15.5.5",
     "eslint-plugin-import": "^2.32.0",
@@ -127,7 +128,7 @@
     "tsx": "^4.20.6",
     "typescript": "^5",
     "typescript-eslint": "^8.46.2",
-    "vitest": "^2.1.9"
+    "vitest": "^4.0.15"
   },
   "lint-staged": {
     "*.{js,ts,tsx}": "next lint --fix --file"

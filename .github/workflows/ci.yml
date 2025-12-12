@@ -47,8 +47,16 @@ jobs:
       - name: Validate Prisma schema
         run: npx prisma validate
 
-      - name: Test
-        run: pnpm test
+      - name: Test and Coverage
+        run: pnpm run test:coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
 
       - name: Build
         env:
