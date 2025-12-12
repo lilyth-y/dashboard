@@ -31,7 +31,7 @@
     "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage __tests__/components __tests__/hooks __tests__/lib __tests__/*.spec.tsx",
     "test:unit": "vitest run __tests__/api/ __tests__/components/ __tests__/hooks/",
     "test:integration": "vitest run __tests__/integration/",
     "test:e2e": "playwright test",
