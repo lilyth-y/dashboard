@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, TransactionCategory, BudgetPeriod } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -193,34 +193,66 @@ async function main() {
   console.log('💰 거래 내역 생성 완료')
 
   // 예산 생성
-  await prisma.budget.createMany({
-    data: [
-      {
-        category: 'SALARY',
-        amount: 10000000,
-        period: 'MONTHLY',
-        year: 2024,
-        month: 1,
-        createdBy: admin.id,
+  // 예산 생성: createMany는 중복 시 실패할 수 있으므로 idempotent하게 존재 여부 확인 후 생성합니다.
+  type BudgetInput = {
+    category: TransactionCategory
+    amount: number
+    period: BudgetPeriod
+    year: number
+    month: number
+    createdBy: string
+  }
+
+  const budgets: BudgetInput[] = [
+    {
+      category: 'SALARY',
+      amount: 10000000,
+      period: 'MONTHLY',
+      year: 2024,
+      month: 1,
+      createdBy: admin.id,
+    },
+    {
+      category: 'MARKETING',
+      amount: 2000000,
+      period: 'MONTHLY',
+      year: 2024,
+      month: 1,
+      createdBy: admin.id,
+    },
+    {
+      category: 'OFFICE_SUPPLIES',
+      amount: 1000000,
+      period: 'MONTHLY',
+      year: 2024,
+      month: 1,
+      createdBy: admin.id,
+    },
+  ]
+
+  for (const b of budgets) {
+    const exists = await prisma.budget.findFirst({
+      where: {
+        category: b.category,
+        period: b.period,
+        year: b.year,
+        month: b.month,
       },
-      {
-        category: 'MARKETING',
-        amount: 2000000,
-        period: 'MONTHLY',
-        year: 2024,
-        month: 1,
-        createdBy: admin.id,
-      },
-      {
-        category: 'OFFICE_SUPPLIES',
-        amount: 1000000,
-        period: 'MONTHLY',
-        year: 2024,
-        month: 1,
-        createdBy: admin.id,
-      },
-    ],
-  })
+    })
+
+    if (!exists) {
+      await prisma.budget.create({
+        data: {
+          category: b.category,
+          amount: b.amount,
+          period: b.period,
+          year: b.year,
+          month: b.month,
+          createdBy: b.createdBy,
+        },
+      })
+    }
+  }
 
   console.log('📊 예산 생성 완료')
 
@@ -254,27 +286,33 @@ async function main() {
   console.log('📈 KPI 지표 생성 완료')
 
   // 현금흐름 예측 생성
-  await prisma.cashFlowProjection.createMany({
-    data: [
-      {
-        date: new Date('2024-02-01'),
-        projectedIncome: 35000000,
-        projectedExpense: 25000000,
-        actualIncome: 33000000,
-        actualExpense: 24000000,
-      },
-      {
-        date: new Date('2024-03-01'),
-        projectedIncome: 40000000,
-        projectedExpense: 28000000,
-      },
-      {
-        date: new Date('2024-04-01'),
-        projectedIncome: 45000000,
-        projectedExpense: 30000000,
-      },
-    ],
-  })
+  // 현금흐름 예측 생성: 날짜(date)에 대한 unique 제약이 있으므로 중복 체크 후 생성합니다.
+  const cashFlows = [
+    {
+      date: new Date('2024-02-01'),
+      projectedIncome: 35000000,
+      projectedExpense: 25000000,
+      actualIncome: 33000000,
+      actualExpense: 24000000,
+    },
+    {
+      date: new Date('2024-03-01'),
+      projectedIncome: 40000000,
+      projectedExpense: 28000000,
+    },
+    {
+      date: new Date('2024-04-01'),
+      projectedIncome: 45000000,
+      projectedExpense: 30000000,
+    },
+  ]
+
+  for (const cf of cashFlows) {
+    const exists = await prisma.cashFlowProjection.findFirst({ where: { date: cf.date } })
+    if (!exists) {
+      await prisma.cashFlowProjection.create({ data: cf })
+    }
+  }
 
   console.log('💹 현금흐름 예측 생성 완료')
 
