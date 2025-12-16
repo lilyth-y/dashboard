@@ -100,15 +100,26 @@ test.describe('Transaction Receipt Upload', () => {
         await dialog.locator('#date').fill('2023-12-25')
 
         // Upload Receipt
+        console.log('Uploading Receipt')
         const fileInput = dialog.locator('input[type="file"]')
-        await fileInput.setInputFiles({
-            name: 'receipt.png',
-            mimeType: 'image/png',
-            buffer: Buffer.from('fake-image-content')
-        })
+        // Use path relative to the test file or absolute
+        // C:\startup\dashboard\e2e\fixtures\receipt.png
+        await fileInput.setInputFiles('c:/startup/dashboard/e2e/fixtures/receipt.png')
 
         // Wait for upload to complete
-        await expect(dialog.getByText('문서 ID: fake-doc-id-123')).toBeVisible()
+        console.log('Waiting for Upload Completion')
+        // Check for success message OR error message
+        const successMsg = dialog.getByText('문서 ID: fake-doc-id-123')
+        await expect(successMsg).toBeVisible({ timeout: 15000 }).catch(async () => {
+            console.log('Success message not found. Checking for errors...')
+            const errorMsg = dialog.locator('.text-destructive') // Assuming error messages have this class or generic text
+            if (await errorMsg.isVisible()) {
+                const text = await errorMsg.textContent()
+                console.log('Found Error Message:', text)
+                throw new Error(`Upload failed with UI error: ${text}`)
+            }
+            throw new Error('Upload timed out and no error message found.')
+        })
 
         // Mock Transaction Submit to verify payload
         let requestBody: any = null
