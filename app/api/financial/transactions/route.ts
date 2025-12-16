@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         date: new Date(date),
         createdBy: session.user.id,
         projectId: projectId || null,
-        receipt: receiptId ? { connect: { id: receiptId } } : undefined,
+        receiptId: receiptId || null,
       },
       include: {
         project: {
