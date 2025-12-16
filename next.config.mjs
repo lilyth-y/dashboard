@@ -10,6 +10,16 @@ const nextConfig = {
   },
   images: {
     unoptimized: false,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'kokonutui.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ferf1mheo22r9ira.public.blob.vercel-storage.com',
+      },
+    ],
   },
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],

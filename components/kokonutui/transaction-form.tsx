@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { uploadAndEnqueueProjectDocument } from "@/lib/documents-client"
 
 
 interface TransactionFormData {
@@ -53,15 +54,18 @@ interface TransactionFormProps {
 
 export default function TransactionForm({ onSuccess }: TransactionFormProps) {
   const [loading, setLoading] = useState(false)
+  const [uploadingReceipt, setUploadingReceipt] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [transactionType, setTransactionType] = useState<'INCOME' | 'EXPENSE'>('EXPENSE')
+  const [receiptDocumentId, setReceiptDocumentId] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors }
   } = useForm<TransactionFormData>({
     defaultValues: {
@@ -69,6 +73,8 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
       date: new Date().toISOString().split('T')[0]
     }
   })
+
+  const selectedProjectId = watch('projectId')
 
   useEffect(() => {
     // 프로젝트 목록 가져오기
@@ -100,11 +106,13 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
         body: JSON.stringify({
           ...data,
           type: transactionType,
+          receiptId: receiptDocumentId,
         }),
       })
 
       if (response.ok) {
         setMessage({ type: 'success', text: '거래가 성공적으로 등록되었습니다.' })
+        setReceiptDocumentId(null)
         reset({
           amount: 0,
           type: transactionType,
@@ -123,6 +131,34 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
       setMessage({ type: 'error', text: '네트워크 오류가 발생했습니다.' })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const onReceiptChange = async (file: File | null) => {
+    if (!file) return
+
+    // Documents are project-scoped.
+    if (!selectedProjectId) {
+      setMessage({ type: 'error', text: '영수증/문서를 첨부하려면 프로젝트를 먼저 선택해주세요.' })
+      return
+    }
+
+    setUploadingReceipt(true)
+    setMessage(null)
+
+    try {
+      const { documentId } = await uploadAndEnqueueProjectDocument({
+        projectId: selectedProjectId,
+        file,
+      })
+
+      setReceiptDocumentId(documentId)
+      setMessage({ type: 'success', text: '영수증/문서가 업로드되었습니다. OCR 처리 중입니다.' })
+    } catch (error: unknown) {
+      console.error('Receipt upload error:', error)
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : '영수증/문서 업로드에 실패했습니다.' })
+    } finally {
+      setUploadingReceipt(false)
     }
   }
 
@@ -184,9 +220,11 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
           </div>
 
           {/* 카테고리 */}
+          {/* 카테고리 */}
           <div className="space-y-2">
             <Label htmlFor="category">카테고리 *</Label>
-            <Select onValueChange={(value) => setValue('category', value)}>
+            <input type="hidden" {...register('category', { required: '카테고리를 선택하세요' })} />
+            <Select onValueChange={(value) => setValue('category', value, { shouldValidate: true })}>
               <SelectTrigger>
                 <SelectValue placeholder="카테고리를 선택하세요" />
               </SelectTrigger>
@@ -246,6 +284,24 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
               </Select>
             </div>
           )}
+
+          {/* 영수증/문서 첨부 (선택사항) */}
+          <div className="space-y-2">
+            <Label htmlFor="receipt">영수증/문서 첨부 (선택사항)</Label>
+            <Input
+              id="receipt"
+              type="file"
+              accept="image/*,application/pdf"
+              disabled={uploadingReceipt}
+              onChange={(e) => {
+                const f = e.currentTarget.files?.[0] ?? null
+                void onReceiptChange(f)
+              }}
+            />
+            {receiptDocumentId && (
+              <p className="text-sm text-muted-foreground">문서 ID: {receiptDocumentId}</p>
+            )}
+          </div>
 
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? '등록 중...' : '거래 등록'}

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 
 import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { getPreferredLocale, t, tApiError } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
 
 async function canManageByTask(taskId: string, userId: string, isAdmin: boolean) {
@@ -18,8 +19,10 @@ async function canManageByTask(taskId: string, userId: string, isAdmin: boolean)
 
 export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
-    const params = await props.params;
-    const taskId = params.id;
+    const locale = getPreferredLocale(req.headers.get("accept-language"))
+
+    const params = await props.params
+    const taskId = params.id
 
     const session = await getServerSession(authOptions)
     if (!session?.user) throw ApiError.unauthorized()
@@ -34,7 +37,7 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
       body = JSON.parse(text)
     } catch (e) {
       console.error("JSON parse error:", e)
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
+      return NextResponse.json({ error: t(locale, "INVALID_JSON") }, { status: 400 })
     }
     const { title, description, status, priority, assignedTo, dueDate } = body as {
       title?: string
@@ -62,20 +65,22 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
     console.error("Task update error:", error)
     
     if (isApiError(error)) {
+      const locale = getPreferredLocale(req.headers.get("accept-language"))
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
     
-    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
+    const locale = getPreferredLocale(req.headers.get("accept-language"))
+    return NextResponse.json({ error: t(locale, "SERVER_ERROR") }, { status: 500 })
   }
 }
 
-export async function DELETE(_req: Request, props: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
   try {
-    const params = await props.params;
-    const taskId = params.id;
+    const params = await props.params
+    const taskId = params.id
 
     const session = await getServerSession(authOptions)
     if (!session?.user) throw ApiError.unauthorized()
@@ -90,12 +95,14 @@ export async function DELETE(_req: Request, props: { params: Promise<{ id: strin
     console.error("Task delete error:", error)
     
     if (isApiError(error)) {
+      const locale = getPreferredLocale(req.headers.get("accept-language"))
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
     
-    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
+    const locale = getPreferredLocale(req.headers.get("accept-language"))
+    return NextResponse.json({ error: t(locale, "SERVER_ERROR") }, { status: 500 })
   }
 }

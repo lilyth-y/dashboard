@@ -3,18 +3,20 @@ import { getServerSession } from "next-auth"
 
 import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { getPreferredLocale, t, tApiError } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
+  const locale = getPreferredLocale(request.headers.get("accept-language"))
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
       throw ApiError.unauthorized()
     }
 
     const body = await request.json()
-    const { amount, type, category, description, date, projectId } = body
+    const { amount, type, category, description, date, projectId, receiptId } = body
 
     // 입력 유효성 검사
     if (!amount || !type || !category || !date) {
@@ -37,6 +39,7 @@ export async function POST(request: NextRequest) {
         date: new Date(date),
         createdBy: session.user.id,
         projectId: projectId || null,
+        receipt: receiptId ? { connect: { id: receiptId } } : undefined,
       },
       include: {
         project: {
@@ -52,25 +55,26 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Transaction creation error:", error)
-    
+
     if (isApiError(error)) {
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
-    
+
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      { error: t(locale, "SERVER_ERROR") },
       { status: 500 }
     )
   }
 }
 
 export async function GET(request: NextRequest) {
+  const locale = getPreferredLocale(request.headers.get("accept-language"))
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
       throw ApiError.unauthorized()
     }
@@ -111,16 +115,16 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("Transaction fetch error:", error)
-    
+
     if (isApiError(error)) {
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
-    
+
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      { error: t(locale, "SERVER_ERROR") },
       { status: 500 }
     )
   }

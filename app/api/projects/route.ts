@@ -3,10 +3,12 @@ import { getServerSession } from "next-auth"
 
 import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { getPreferredLocale, t, tApiError } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
 
 // GET /api/projects - list projects for current user; admins see all
-export async function GET() {
+export async function GET(request?: Request) {
+  const locale = getPreferredLocale(request?.headers?.get("accept-language"))
   try {
     const session = await getServerSession(authOptions)
 
@@ -70,13 +72,13 @@ export async function GET() {
     
     if (isApiError(error)) {
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
     
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      { error: t(locale, "SERVER_ERROR") },
       { status: 500 }
     )
   }
@@ -84,6 +86,7 @@ export async function GET() {
 
 // POST /api/projects - create a new project; creator becomes OWNER
 export async function POST(request: Request) {
+  const locale = getPreferredLocale(request.headers.get("accept-language"))
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
@@ -124,13 +127,13 @@ export async function POST(request: Request) {
     
     if (isApiError(error)) {
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
     
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      { error: t(locale, "SERVER_ERROR") },
       { status: 500 }
     )
   }

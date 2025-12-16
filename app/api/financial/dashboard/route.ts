@@ -3,12 +3,14 @@ import { getServerSession } from "next-auth"
 
 import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { getPreferredLocale, t, tApiError } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
 
-export async function GET() {
+export async function GET(request?: Request) {
+  const locale = getPreferredLocale(request?.headers.get("accept-language"))
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
       throw ApiError.unauthorized()
     }
@@ -20,6 +22,12 @@ export async function GET() {
       include: {
         project: {
           select: { name: true }
+        },
+        receipt: {
+          select: {
+            id: true,
+            filename: true,
+          }
         }
       }
     })
@@ -94,16 +102,16 @@ export async function GET() {
 
   } catch (error) {
     console.error("Financial data fetch error:", error)
-    
+
     if (isApiError(error)) {
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
-    
+
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      { error: t(locale, "SERVER_ERROR") },
       { status: 500 }
     )
   }

@@ -31,7 +31,7 @@ export default withAuth(
       authorized: ({ token, req }) => {
         // 인증이 필요한 페이지들
         const protectedPaths = ["/dashboard", "/admin"]
-        const isProtectedPath = protectedPaths.some(path => 
+        const isProtectedPath = protectedPaths.some(path =>
           req.nextUrl.pathname.startsWith(path)
         )
 

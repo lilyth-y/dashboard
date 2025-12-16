@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 
 import { ApiError, isApiError } from "@/lib/api-error"
 import { authOptions } from "@/lib/auth"
+import { getPreferredLocale, t, tApiError } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
 
 async function canView(projectId: string, userId: string, isAdmin: boolean) {
@@ -25,6 +26,7 @@ async function canManage(projectId: string, userId: string, isAdmin: boolean) {
 
 // GET milestones
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const locale = getPreferredLocale(_req.headers.get("accept-language"))
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) throw ApiError.unauthorized()
@@ -46,17 +48,18 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     
     if (isApiError(error)) {
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
     
-    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
+    return NextResponse.json({ error: t(locale, "SERVER_ERROR") }, { status: 500 })
   }
 }
 
 // POST create milestone
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const locale = getPreferredLocale(req.headers.get("accept-language"))
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) throw ApiError.unauthorized()
@@ -88,11 +91,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     
     if (isApiError(error)) {
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: tApiError(locale, error), code: error.code },
         { status: error.statusCode }
       )
     }
     
-    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
+    return NextResponse.json({ error: t(locale, "SERVER_ERROR") }, { status: 500 })
   }
 }

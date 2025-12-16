@@ -1,0 +1,15 @@
+
+> my-v0-project@0.1.0 lint C:\startup\dashboard
+> next lint
+
+
+./components/kokonutui/transaction-form.tsx
+13:1  Warning: There should be no empty line within import group  import/order
+
+./lib/documents-client.ts
+34:78  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+35:20  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+69:58  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+ ELIFECYCLE  Command failed with exit code 1.

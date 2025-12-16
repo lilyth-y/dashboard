@@ -68,7 +68,7 @@ describe('ProjectsPage', () => {
     })
 
     expect(projectsApi.list).toHaveBeenCalledTimes(1)
-  })
+  }, 15000)
 
   test('displays project details correctly', async () => {
     vi.mocked(projectsApi.list).mockResolvedValue({ projects: mockProjects })

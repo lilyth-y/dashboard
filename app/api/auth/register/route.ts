@@ -1,22 +1,24 @@
 import bcrypt from "bcryptjs"
 import { NextRequest, NextResponse } from "next/server"
 
+import { getPreferredLocale, t } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
+  const locale = getPreferredLocale(request.headers.get("accept-language"))
   try {
     const { name, email, password } = await request.json()
 
     if (!name || !email || !password) {
       return NextResponse.json(
-        { message: "모든 필드를 입력해주세요." },
+        { message: t(locale, "REGISTER_FIELDS_REQUIRED") },
         { status: 400 }
       )
     }
 
     if (password.length < 8) {
       return NextResponse.json(
-        { message: "비밀번호는 최소 8자 이상이어야 합니다." },
+        { message: t(locale, "REGISTER_PASSWORD_MIN") },
         { status: 400 }
       )
     }
@@ -28,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "이미 사용 중인 이메일입니다." },
+        { message: t(locale, "REGISTER_EMAIL_IN_USE") },
         { status: 400 }
       )
     }
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { 
-        message: "회원가입이 완료되었습니다.",
+        message: t(locale, "REGISTER_SUCCESS"),
         user: userWithoutPassword 
       },
       { status: 201 }
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Registration error:", error)
     return NextResponse.json(
-      { message: "서버 오류가 발생했습니다." },
+      { message: t(locale, "SERVER_ERROR") },
       { status: 500 }
     )
   }

@@ -55,6 +55,7 @@ model User {
   createdTransactions Transaction[] @relation("CreatedBy")
   createdBudgets      Budget[]      @relation("CreatedBy")
   createdProjects     Project[]     @relation("CreatedBy")
+  createdDocuments    Document[]
 }
 
 model VerificationToken {
@@ -86,6 +87,9 @@ model Transaction {
   creator User     @relation("CreatedBy", fields: [createdBy], references: [id])
   project Project? @relation(fields: [projectId], references: [id])
 
+  receiptId   String?   @unique
+  receipt     Document? @relation(fields: [receiptId], references: [id])
+  
   @@index([date])
   @@index([type])
   @@index([category])
@@ -196,6 +200,44 @@ model Project {
   tasks        Task[]
   milestones   Milestone[]
   transactions Transaction[]
+  documents    Document[]
+}
+
+model Document {
+  id          String         @id @default(cuid())
+  projectId   String
+  createdBy   String
+  filename    String
+  mimeType    String
+  sizeBytes   Int?
+
+  storageBucket String
+  storageKey    String
+  gcsUri        String
+
+  status       DocumentStatus @default(UPLOADED)
+  extractedText String?
+  extractedData Json?
+  processedAt   DateTime?
+  errorMessage  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator User    @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  transaction Transaction?
+
+  @@index([projectId, createdAt])
+  @@index([status, createdAt])
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  PROCESSED
+  FAILED
 }
 
 enum ProjectStatus {

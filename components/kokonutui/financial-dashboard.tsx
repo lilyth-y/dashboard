@@ -1,6 +1,6 @@
 "use client"
 
-import { TrendingUp, TrendingDown, DollarSign } from "lucide-react"
+import { TrendingUp, TrendingDown, DollarSign, Paperclip } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 
@@ -16,6 +16,7 @@ interface FinancialData {
     description: string
     date: string
     project?: { name: string }
+    receipt?: { id: string; filename: string }
   }>
   monthlyStats: Array<{
     type: string
@@ -38,7 +39,14 @@ interface FinancialData {
   }
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
+const COLORS = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  'hsl(var(--primary))'
+]
 
 const categoryNames: Record<string, string> = {
   SALARY: '급여',
@@ -115,10 +123,10 @@ export default function FinancialDashboard() {
   }))
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* 재무 요약 카드들 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">총 수입</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
@@ -130,7 +138,7 @@ export default function FinancialDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300 delay-100 animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">총 지출</CardTitle>
             <TrendingDown className="h-4 w-4 text-red-600" />
@@ -142,7 +150,7 @@ export default function FinancialDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300 delay-200 animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">순이익</CardTitle>
             <DollarSign className="h-4 w-4 text-blue-600" />
@@ -157,7 +165,7 @@ export default function FinancialDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 카테고리별 지출 파이 차트 */}
-        <Card>
+        <Card className="col-span-1 hover:shadow-lg transition-shadow duration-300 delay-300 animate-in fade-in slide-in-from-bottom-8 fill-mode-backwards">
           <CardHeader>
             <CardTitle>카테고리별 지출</CardTitle>
             <CardDescription>최근 6개월 지출 분석</CardDescription>
@@ -201,7 +209,7 @@ export default function FinancialDashboard() {
         </Card>
 
         {/* 최근 거래 내역 */}
-        <Card>
+        <Card className="col-span-1 hover:shadow-lg transition-shadow duration-300 delay-400 animate-in fade-in slide-in-from-bottom-8 fill-mode-backwards">
           <CardHeader>
             <CardTitle>최근 거래 내역</CardTitle>
             <CardDescription>최근 10건의 거래</CardDescription>
@@ -225,6 +233,12 @@ export default function FinancialDashboard() {
                       <p className="text-sm text-gray-500">
                         {new Date(transaction.date).toLocaleDateString('ko-KR')}
                         {transaction.project && ` • ${transaction.project.name}`}
+                        {transaction.receipt && (
+                          <span className="ml-2 inline-flex items-center text-xs text-blue-500 hover:text-blue-700 cursor-pointer" title={transaction.receipt.filename}>
+                            <Paperclip className="h-3 w-3 mr-1" />
+                            영수증
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>

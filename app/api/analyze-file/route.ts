@@ -1,13 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server"
+
+import { getPreferredLocale, t } from "@/lib/i18n"
 
 export async function POST(req: NextRequest) {
   try {
+    const locale = getPreferredLocale(req.headers.get("accept-language"))
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
     if (!file) {
       return NextResponse.json(
-        { error: 'No file provided' },
+        { error: t(locale, "NO_FILE"), code: "NO_FILE" },
         { status: 400 }
       );
     }
@@ -25,7 +29,11 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`ML Service error: ${errorText}`);
+      console.error("ML Service error:", errorText)
+      return NextResponse.json(
+        { error: t(locale, "ML_SERVICE_ERROR"), code: "ML_SERVICE_ERROR" },
+        { status: 502 }
+      )
     }
 
     const data = await response.json();
@@ -34,7 +42,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Error analyzing file:', error);
     return NextResponse.json(
-      { error: 'Failed to analyze file' },
+      { error: t(getPreferredLocale(req.headers.get("accept-language")), "ANALYZE_FAILED"), code: "ANALYZE_FAILED" },
       { status: 500 }
     );
   }

@@ -13,7 +13,7 @@ interface MenuItem {
 interface Profile01Props {
   name?: string
   role?: string
-  avatar: string
+  avatar?: string
   subscription?: string
   userName?: string | null
   userEmail?: string | null
@@ -23,7 +23,7 @@ interface Profile01Props {
 const defaultProfile: Required<Pick<Profile01Props, "name" | "role" | "avatar" | "subscription">> = {
   name: "Eugene An",
   role: "Prompt Engineer",
-  avatar: "https://ferf1mheo22r9ira.public.blob.vercel-storage.com/avatar-02-albo9B0tWOSLXCVZh9rX9KFxXIVWMr.png",
+  avatar: "/avatar-placeholder.svg",
   subscription: "Free Trial",
 }
 
